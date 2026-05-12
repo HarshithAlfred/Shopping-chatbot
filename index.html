@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShopBot — AI Shopping Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── VARIABLES ─────────────────────────────────────────── */
+:root {
+  --bg:       #080c10;
+  --surf1:    #0f1318;
+  --surf2:    #161c22;
+  --surf3:    #1d252e;
+  --border:   #252e38;
+  --border2:  #2f3a46;
+  --gold:     #e8b84b;
+  --gold2:    #f5d27a;
+  --golddim:  rgba(232,184,75,0.12);
+  --goldglow: rgba(232,184,75,0.22);
+  --text:     #eef0f2;
+  --textdim:  #8a9299;
+  --textmut:  #4a5560;
+  --green:    #4caf82;
+  --red:      #e05555;
+  --blue:     #4a8fe8;
+  --purple:   #8b5cf6;
+  --r:        12px;
+  --rsm:      8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;font-size:14px}
+
+/* ── SIDEBAR ───────────────────────────────────────────── */
+.sidebar{width:260px;min-width:260px;background:var(--surf1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.logo{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+.logo-name{font-family:'Playfair Display',serif;font-size:24px;color:var(--gold);letter-spacing:-0.5px}
+.logo-tag{font-size:10px;color:var(--textmut);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-sect{padding:14px 14px 0}
+.sb-label{font-size:10px;font-weight:600;color:var(--textmut);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;padding:0 4px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.cat-btn{padding:7px 8px;border-radius:var(--rsm);border:1px solid var(--border);background:transparent;color:var(--textdim);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;gap:5px}
+.cat-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--golddim)}
+.sb-stats{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.stat-label{font-size:11px;color:var(--textmut)}
+.stat-val{font-size:12px;font-weight:600;color:var(--gold)}
+
+/* ── MAIN CHAT ─────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── HEADER ────────────────────────────────────────────── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surf1)}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.bot-av{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.bot-name{font-weight:600;font-size:15px}
+.bot-status{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--green)}
+.dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-btns{display:flex;gap:6px}
+.ibtn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--textdim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s}
+.ibtn:hover{border-color:var(--gold);color:var(--gold);background:var(--golddim)}
+.ibtn.active{border-color:var(--gold);color:var(--gold);background:var(--golddim)}
+
+/* ── NLP STRIP ─────────────────────────────────────────── */
+.nlp-strip{padding:6px 20px;background:var(--surf2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:32px}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;border:1px solid transparent}
+.tag-intent{background:rgba(74,143,232,.12);color:var(--blue);border-color:rgba(74,143,232,.25)}
+.tag-pos{background:rgba(76,175,130,.12);color:var(--green);border-color:rgba(76,175,130,.25)}
+.tag-neg{background:rgba(224,85,85,.12);color:var(--red);border-color:rgba(224,85,85,.25)}
+.tag-neu{background:rgba(138,146,153,.1);color:var(--textdim);border-color:var(--border)}
+.tag-gold{background:var(--golddim);color:var(--gold);border-color:rgba(232,184,75,.25)}
+.tag-purple{background:rgba(139,92,246,.12);color:var(--purple);border-color:rgba(139,92,246,.25)}
+.nlp-ms{margin-left:auto;font-size:10px;color:var(--textmut)}
+
+/* ── MESSAGES ──────────────────────────────────────────── */
+.msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg-group{display:flex;flex-direction:column;gap:3px;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-group.user{align-items:flex-end}
+.msg-group.bot{align-items:flex-start}
+.msg-meta{font-size:10px;color:var(--textmut);padding:0 4px;display:flex;align-items:center;gap:6px}
+.bubble{max-width:75%;padding:11px 15px;border-radius:var(--r);font-size:13.5px;line-height:1.65;position:relative}
+.bubble.user{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1000;font-weight:500;border-bottom-right-radius:3px}
+.bubble.bot{background:var(--surf2);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px}
+.bubble.bot.escalate{border-color:var(--red);background:rgba(224,85,85,.08)}
+.bubble strong{color:var(--gold2);font-weight:600}
+.bubble em{color:var(--textdim)}
+
+/* ── PRODUCT GRID ──────────────────────────────────────── */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;width:100%;margin-top:10px}
+.prod-card{background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .22s;position:relative;display:flex;flex-direction:column}
+.prod-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 10px 32px rgba(0,0,0,.5)}
+.prod-card.in-compare{border-color:var(--purple);box-shadow:0 0 0 2px rgba(139,92,246,.3)}
+
+/* Image */
+.prod-img-wrap{position:relative;height:150px;background:var(--surf3);overflow:hidden;flex-shrink:0}
+.prod-img{width:100%;height:100%;object-fit:contain;padding:10px;transition:transform .3s}
+.prod-card:hover .prod-img{transform:scale(1.05)}
+.prod-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--textmut)}
+.best-badge{position:absolute;top:8px;left:8px;background:var(--gold);color:#1a1000;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
+.discount-badge{position:absolute;top:8px;right:8px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px}
+.compare-check{position:absolute;bottom:8px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--surf1);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0;transition:all .2s}
+.prod-card:hover .compare-check{opacity:1}
+.prod-card.in-compare .compare-check{opacity:1;background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* Card body */
+.prod-body{padding:10px;display:flex;flex-direction:column;gap:5px;flex:1}
+.prod-cat{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:600}
+.prod-title{font-size:11.5px;font-weight:500;line-height:1.4;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-price-row{display:flex;align-items:baseline;gap:5px}
+.prod-price{font-size:16px;font-weight:700;color:var(--gold2)}
+.prod-list-price{font-size:10px;color:var(--textmut);text-decoration:line-through}
+.prod-stars{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--textdim)}
+.stars-fill{color:#f5c518}
+.prod-actions{display:flex;gap:5px;margin-top:auto;padding-top:6px}
+.btn-buy{flex:1;padding:7px 4px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1000;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px}
+.btn-buy:hover{transform:translateY(-1px);box-shadow:0 4px 14px var(--goldglow)}
+.btn-detail{padding:7px 8px;background:transparent;border:1px solid var(--border2);border-radius:7px;color:var(--textdim);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .2s}
+.btn-detail:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── COMPARE BAR ───────────────────────────────────────── */
+.compare-bar{position:fixed;bottom:0;left:260px;right:0;background:var(--surf1);border-top:1px solid var(--purple);padding:10px 20px;display:none;align-items:center;gap:12px;z-index:100}
+.compare-bar.visible{display:flex}
+.compare-bar-items{display:flex;gap:8px;flex:1}
+.compare-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--surf2);border:1px solid var(--purple);border-radius:8px;font-size:11px;max-width:200px}
+.compare-chip img{width:26px;height:26px;object-fit:contain;border-radius:4px;background:var(--surf3)}
+.compare-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.compare-chip button{background:none;border:none;color:var(--textdim);cursor:pointer;padding:0 2px;font-size:13px;flex-shrink:0}
+.btn-compare-go{padding:8px 18px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-compare-go:hover{background:#7c3aed}
+
+/* ── LOCATION MAP ──────────────────────────────────────── */
+.store-map-wrap{background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px;width:100%}
+.store-map-title{font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.store-map-canvas{position:relative;height:160px;background:var(--surf3);border-radius:8px;overflow:hidden}
+.store-map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(var(--border2) 1px,transparent 1px),linear-gradient(90deg,var(--border2) 1px,transparent 1px);background-size:20px 20px}
+.store-pin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px}
+.pin-dot{width:16px;height:16px;background:var(--gold);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 12px var(--goldglow);animation:pinPulse 2s infinite}
+@keyframes pinPulse{0%,100%{box-shadow:0 0 8px var(--goldglow)}50%{box-shadow:0 0 20px var(--goldglow)}}
+.pin-label{font-size:9px;font-weight:700;color:var(--gold);background:var(--bg);padding:1px 5px;border-radius:4px;white-space:nowrap}
+.store-map-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.store-info-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--textdim)}
+.store-info-icon{font-size:13px}
+
+/* ── TYPING ─────────────────────────────────────────────── */
+.typing{display:flex;align-items:center;gap:4px;padding:11px 15px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);border-bottom-left-radius:3px;width:fit-content}
+.t-dot{width:5px;height:5px;background:var(--gold);border-radius:50%;animation:tdot 1.2s infinite}
+.t-dot:nth-child(2){animation-delay:.2s}
+.t-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+
+/* ── CART PANEL ─────────────────────────────────────────── */
+.cart-panel{width:0;overflow:hidden;background:var(--surf1);border-left:1px solid var(--border);transition:width .3s;display:flex;flex-direction:column}
+.cart-panel.open{width:260px;min-width:260px}
+.cart-hdr{padding:18px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cart-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--text)}
+.cart-items{flex:1;overflow-y:auto;padding:10px}
+.cart-item{display:flex;gap:8px;padding:8px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);margin-bottom:6px}
+.cart-item img{width:36px;height:36px;object-fit:contain;border-radius:5px;background:var(--surf3);flex-shrink:0}
+.cart-info{flex:1;min-width:0}
+.cart-name{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-price{font-size:12px;color:var(--gold);font-weight:700}
+.cart-foot{padding:12px;border-top:1px solid var(--border)}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px;font-weight:600}
+.cart-total span:last-child{color:var(--gold2)}
+.btn-checkout{width:100%;padding:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1000;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-checkout:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--goldglow)}
+
+/* ── INPUT AREA ─────────────────────────────────────────── */
+.input-area{padding:14px 18px;border-top:1px solid var(--border);background:var(--surf1)}
+.quick-pills{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.pill{padding:4px 11px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--textdim);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.pill:hover{border-color:var(--gold);color:var(--gold);background:var(--golddim)}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+.input-wrap{flex:1;position:relative}
+textarea{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:11px;padding:11px 44px 11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;resize:none;outline:none;min-height:44px;max-height:110px;line-height:1.5;transition:border-color .2s}
+textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--golddim)}
+textarea::placeholder{color:var(--textmut)}
+.mic-btn{position:absolute;right:10px;bottom:10px;width:24px;height:24px;background:transparent;border:none;color:var(--textdim);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:color .2s}
+.mic-btn.listening{color:var(--red);animation:micPulse 1s infinite}
+@keyframes micPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.send-btn{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#1a1000;transition:all .2s;flex-shrink:0}
+.send-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px var(--goldglow)}
+.send-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── WELCOME ─────────────────────────────────────────────── */
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
+.welcome-icon{width:72px;height:72px;background:var(--golddim);border:1px solid rgba(232,184,75,.25);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:18px;box-shadow:0 0 40px var(--golddim)}
+.welcome h2{font-family:'Playfair Display',serif;font-size:26px;margin-bottom:8px}
+.welcome p{color:var(--textdim);max-width:360px;line-height:1.6;font-size:13px;margin-bottom:22px}
+.suggest-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%;max-width:380px}
+.suggest-card{background:var(--surf2);border:1px solid var(--border);border-radius:11px;padding:11px;cursor:pointer;text-align:left;transition:all .2s;font-family:'DM Sans',sans-serif}
+.suggest-card:hover{border-color:var(--gold);background:var(--golddim)}
+.suggest-icon{font-size:19px;margin-bottom:3px;display:block}
+.suggest-text{font-size:11px;color:var(--textdim);line-height:1.4}
+
+/* ── VOICE MODAL ─────────────────────────────────────────── */
+.voice-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center}
+.voice-modal.show{display:flex}
+.voice-card{background:var(--surf1);border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;width:280px}
+.voice-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:48px;margin:16px 0}
+.wave-bar{width:4px;background:var(--gold);border-radius:2px;animation:waveAnim 1s ease-in-out infinite}
+.wave-bar:nth-child(1){animation-delay:0s;height:12px}
+.wave-bar:nth-child(2){animation-delay:.1s;height:24px}
+.wave-bar:nth-child(3){animation-delay:.2s;height:40px}
+.wave-bar:nth-child(4){animation-delay:.3s;height:28px}
+.wave-bar:nth-child(5){animation-delay:.4s;height:16px}
+.wave-bar:nth-child(6){animation-delay:.3s;height:32px}
+.wave-bar:nth-child(7){animation-delay:.2s;height:20px}
+@keyframes waveAnim{0%,100%{transform:scaleY(.5);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+.voice-status{font-size:13px;color:var(--textdim);margin-bottom:12px}
+.btn-stop-voice{padding:9px 24px;background:var(--red);color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600}
+
+/* ── PRODUCT MODAL ───────────────────────────────────────── */
+.prod-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.prod-modal.show{display:flex}
+.prod-modal-card{background:var(--surf1);border:1px solid var(--border2);border-radius:18px;width:100%;max-width:480px;overflow:hidden}
+.prod-modal-img{width:100%;height:220px;object-fit:contain;background:var(--surf2);padding:16px}
+.prod-modal-body{padding:18px}
+.prod-modal-cat{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.prod-modal-title{font-size:15px;font-weight:600;line-height:1.4;margin-bottom:10px}
+.prod-modal-price{font-size:22px;font-weight:700;color:var(--gold2);margin-bottom:8px}
+.prod-modal-stars{font-size:12px;color:var(--textdim);margin-bottom:14px}
+.prod-modal-actions{display:flex;gap:8px}
+.btn-modal-buy{flex:1;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1000;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-modal-close{padding:12px 16px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--textdim);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-modal-close:hover{border-color:var(--text);color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-name">ShopBot</div>
+    <div class="logo-tag">AI Shopping Assistant</div>
+  </div>
+  <div class="sb-sect" style="margin-top:12px">
+    <div class="sb-label">Browse Categories</div>
+    <div class="cat-grid">
+      <button class="cat-btn" onclick="sendQ('show me electronics')">📱 Electronics</button>
+      <button class="cat-btn" onclick="sendQ('show me clothing')">👕 Clothing</button>
+      <button class="cat-btn" onclick="sendQ('show me shoes')">👟 Shoes</button>
+      <button class="cat-btn" onclick="sendQ('show me home products')">🏠 Home</button>
+      <button class="cat-btn" onclick="sendQ('show me toys')">🧸 Toys</button>
+      <button class="cat-btn" onclick="sendQ('show me beauty products')">✨ Beauty</button>
+      <button class="cat-btn" onclick="sendQ('show me sports gear')">⚽ Sports</button>
+      <button class="cat-btn" onclick="sendQ('show me books')">📚 Books</button>
+      <button class="cat-btn" onclick="sendQ('show me kitchen appliances')">🍳 Kitchen</button>
+      <button class="cat-btn" onclick="sendQ('show me chargers and cables')">🔌 Cables</button>
+    </div>
+  </div>
+  <div class="sb-sect" style="margin-top:14px">
+    <div class="sb-label">Session Stats</div>
+    <div class="stat"><span class="stat-label">Messages</span><span class="stat-val" id="s-msgs">0</span></div>
+    <div class="stat"><span class="stat-label">Products seen</span><span class="stat-val" id="s-prods">0</span></div>
+    <div class="stat"><span class="stat-label">Cart items</span><span class="stat-val" id="s-cart">0</span></div>
+    <div class="stat"><span class="stat-label">Last intent</span><span class="stat-val" id="s-intent">—</span></div>
+  </div>
+  <div class="sb-stats">
+    <div class="sb-label">Voice Mode</div>
+    <div style="display:flex;align-items:center;gap:8px;padding-top:6px">
+      <button id="tts-toggle" class="ibtn" onclick="toggleTTS()" title="Toggle voice output" style="width:auto;padding:5px 10px;font-size:11px;gap:4px;display:flex;align-items:center">
+        🔊 <span>Voice Off</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <div class="bot-av">🛍️</div>
+      <div>
+        <div class="bot-name">ShopBot</div>
+        <div class="bot-status"><span class="dot"></span>Semantic Search Active</div>
+      </div>
+    </div>
+    <div class="hdr-btns">
+      <button class="ibtn" id="compare-btn" onclick="triggerCompare()" title="Compare selected">⚖️</button>
+      <button class="ibtn" onclick="toggleCart()" title="Cart">🛒</button>
+      <button class="ibtn" onclick="clearChat()" title="Clear">🗑️</button>
+    </div>
+  </header>
+
+  <!-- NLP STRIP -->
+  <div class="nlp-strip" id="nlp-strip">
+    <span style="color:var(--textmut);font-size:10px">NLP insights appear here after your first message</span>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="msgs" id="msgs">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">🤖</div>
+      <h2>Your AI Shopping Guide</h2>
+      <p>I search 50,000+ real products with live images and Amazon buy links. Voice in, voice out. Store navigation included.</p>
+      <div class="suggest-grid">
+        <button class="suggest-card" onclick="sendQ('suggest me branded socks')">
+          <span class="suggest-icon">🧦</span>
+          <span class="suggest-text">Suggest branded socks</span>
+        </button>
+        <button class="suggest-card" onclick="sendQ('where can I get a TV')">
+          <span class="suggest-icon">📺</span>
+          <span class="suggest-text">Where can I get a TV?</span>
+        </button>
+        <button class="suggest-card" onclick="sendQ('best charger under $20')">
+          <span class="suggest-icon">🔌</span>
+          <span class="suggest-text">Best charger under $20</span>
+        </button>
+        <button class="suggest-card" onclick="sendQ('compare Nike vs Adidas shoes')">
+          <span class="suggest-icon">⚖️</span>
+          <span class="suggest-text">Compare Nike vs Adidas</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area">
+    <div class="quick-pills">
+      <button class="pill" onclick="sendQ('recommend popular products')">⭐ Popular</button>
+      <button class="pill" onclick="sendQ('show discounts and deals')">🏷️ Deals</button>
+      <button class="pill" onclick="sendQ('where is electronics section')">🗺️ Find in store</button>
+      <button class="pill" onclick="sendQ('what is the return policy')">↩️ Returns</button>
+      <button class="pill" onclick="sendQ('help')">❓ Help</button>
+    </div>
+    <div class="input-row">
+      <div class="input-wrap">
+        <textarea id="inp" placeholder="Ask anything — 'branded socks', 'TV under $300', 'where are chargers'…" rows="1"
+          onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+        <button class="mic-btn" id="mic-btn" onclick="startVoice()" title="Speak">🎤</button>
+      </div>
+      <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+</main>
+
+<!-- CART PANEL -->
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-hdr">
+    <span class="cart-title">🛒 Cart</span>
+    <button class="ibtn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items"><p style="color:var(--textmut);font-size:12px;text-align:center;padding:18px">Your cart is empty</p></div>
+  <div class="cart-foot" id="cart-foot" style="display:none">
+    <div class="cart-total"><span>Total</span><span id="cart-total-price">$0.00</span></div>
+    <button class="btn-checkout">Checkout →</button>
+  </div>
+</div>
+
+<!-- COMPARE BAR -->
+<div class="compare-bar" id="compare-bar">
+  <span style="font-size:11px;color:var(--textdim);white-space:nowrap">Compare:</span>
+  <div class="compare-bar-items" id="compare-items"></div>
+  <button class="btn-compare-go" onclick="runCompare()">Compare Now ⚖️</button>
+  <button class="ibtn" onclick="clearCompare()" title="Clear">✕</button>
+</div>
+
+<!-- VOICE MODAL -->
+<div class="voice-modal" id="voice-modal">
+  <div class="voice-card">
+    <div style="font-size:24px">🎤</div>
+    <div style="font-size:15px;font-weight:600;margin-top:8px">Listening…</div>
+    <div class="voice-wave">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+    <div class="voice-status" id="voice-status">Say your query clearly</div>
+    <button class="btn-stop-voice" onclick="stopVoice()">Stop ■</button>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="prod-modal" id="prod-modal" onclick="closeProdModal(event)">
+  <div class="prod-modal-card" onclick="event.stopPropagation()">
+    <img id="pm-img" src="" alt="" class="prod-modal-img">
+    <div class="prod-modal-body">
+      <div class="prod-modal-cat" id="pm-cat"></div>
+      <div class="prod-modal-title" id="pm-title"></div>
+      <div class="prod-modal-price" id="pm-price"></div>
+      <div class="prod-modal-stars" id="pm-stars"></div>
+      <div class="prod-modal-actions">
+        <a id="pm-buy" href="#" target="_blank" class="btn-modal-buy">🛒 Buy on Amazon</a>
+        <button class="btn-modal-close" onclick="document.getElementById('prod-modal').classList.remove('show')">✕ Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────
+const API = 'http://localhost:5000';
+let sessionId = 'sess_' + Date.now();
+let msgCount = 0, prodsSeen = 0, cartOpen = false;
+let compareList = [];        // up to 2 products for comparison
+let ttsEnabled = false;
+let recognition = null;
+
+// ── SEND ──────────────────────────────────────────────────
+async function sendMsg() {
+  const inp = document.getElementById('inp');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  hideWelcome();
+  inp.value = ''; inp.style.height = 'auto';
+  addMsg('user', txt);
+  showTyping();
+  setBusy(true);
+
+  try {
+    const res = await fetch(`${API}/api/chat`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({message: txt, session_id: sessionId})
+    });
+    const d = await res.json();
+    removeTyping();
+    addBotMsg(d);
+    updateNLP(d.nlp);
+    updateStats(d);
+    if (d.cart) renderCart(d.cart);
+    if (ttsEnabled && d.response) speak(d.response.replace(/\*\*/g,'').replace(/\n/g,' '));
+  } catch(e) {
+    removeTyping();
+    addBotMsg({response:"⚠️ Cannot reach the server. Make sure `python app.py` is running on port 5000.", products:[], type:'error'});
+  }
+  setBusy(false);
+  document.getElementById('inp').focus();
+}
+
+function sendQ(q) { document.getElementById('inp').value = q; sendMsg(); }
+
+// ── MESSAGES ──────────────────────────────────────────────
+function hideWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+}
+
+function addMsg(who, text) {
+  msgCount++;
+  const wrap = document.getElementById('msgs');
+  const g = document.createElement('div');
+  g.className = `msg-group ${who}`;
+  g.innerHTML = `
+    <div class="msg-meta">${who === 'bot' ? '🤖 ShopBot · ' : ''}${timeNow()}</div>
+    <div class="bubble ${who}">${who==='user' ? esc(text) : md(text)}</div>
+  `;
+  wrap.appendChild(g); scrollBot();
+}
+
+function addBotMsg(d) {
+  const wrap = document.getElementById('msgs');
+  const g = document.createElement('div');
+  g.className = 'msg-group bot';
+  const intentTag = d.nlp ? `<span class="tag tag-intent">${d.nlp.intent.replace(/_/g,' ')}</span>` : '';
+  const escalateCls = d.escalate ? ' escalate' : '';
+
+  let prods = '';
+  if (d.products && d.products.length > 0) {
+    prodsSeen += d.products.length;
+    prods = `<div class="prod-grid">${d.products.map(p => prodCard(p)).join('')}</div>`;
+  }
+
+  let locMap = '';
+  if (d.location) locMap = storeMap(d.location);
+
+  g.innerHTML = `
+    <div class="msg-meta">🤖 ShopBot · ${timeNow()} ${intentTag}</div>
+    <div class="bubble bot${escalateCls}">${md(d.response)}</div>
+    ${prods}
+    ${locMap}
+  `;
+  wrap.appendChild(g); scrollBot();
+}
+
+// ── PRODUCT CARD ──────────────────────────────────────────
+function prodCard(p) {
+  const img    = p.img_url ? `<img class="prod-img" src="${esc(p.img_url)}" alt="${esc(p.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div class="prod-img-placeholder" style="display:none">🛍️</div>` : `<div class="prod-img-placeholder">🛍️</div>`;
+  const best   = p.is_best_seller ? `<span class="best-badge">🏆 Best Seller</span>` : '';
+  const disc   = p.discount > 0 ? `<span class="discount-badge">-${p.discount}%</span>` : '';
+  const lp     = p.list_price > p.price ? `<span class="prod-list-price">$${p.list_price.toFixed(2)}</span>` : '';
+  const stars  = starsHtml(p.stars, p.reviews);
+  const buyUrl = p.buy_url || '#';
+  const inComp = compareList.find(c=>c.asin===p.asin) ? 'in-compare' : '';
+  const chk    = inComp ? '✓' : '+';
+
+  return `
+    <div class="prod-card ${inComp}" data-asin="${p.asin}" onclick="openProdModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+      <div class="prod-img-wrap">
+        ${img}
+        ${best}${disc}
+        <button class="compare-check" onclick="event.stopPropagation();toggleCompare(${JSON.stringify(p).replace(/"/g,'&quot;')})" title="Add to compare">${chk}</button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-cat">${esc(p.category)}</div>
+        <div class="prod-title">${esc(p.title)}</div>
+        <div class="prod-price-row">
+          <span class="prod-price">$${p.price.toFixed(2)}</span>
+          ${lp}
+        </div>
+        <div class="prod-stars">${stars}</div>
+        <div class="prod-actions">
+          <a class="btn-buy" href="${esc(buyUrl)}" target="_blank" onclick="event.stopPropagation()">🛒 Buy Now</a>
+          <button class="btn-detail" onclick="event.stopPropagation();askDetail('${esc(p.title.slice(0,40))}')">ℹ️</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function starsHtml(stars, reviews) {
+  const full = Math.round(stars);
+  const s = '★'.repeat(full) + '☆'.repeat(5-full);
+  return `<span class="stars-fill">${s}</span> ${stars.toFixed(1)} ${reviews > 0 ? `(${reviews.toLocaleString()})` : ''}`;
+}
+
+// ── STORE MAP ─────────────────────────────────────────────
+function storeMap(loc) {
+  const x = Math.max(10, Math.min(90, loc.map_x));
+  const y = Math.max(10, Math.min(90, loc.map_y));
+  return `
+    <div class="store-map-wrap">
+      <div class="store-map-title">📍 In-Store Location</div>
+      <div class="store-map-canvas">
+        <div class="store-map-grid"></div>
+        <div class="store-pin" style="left:${x}%;top:${y}%">
+          <div class="pin-dot"></div>
+          <div class="pin-label">${loc.aisle}</div>
+        </div>
+      </div>
+      <div class="store-map-info">
+        <div class="store-info-item"><span class="store-info-icon">🏢</span>${loc.floor}</div>
+        <div class="store-info-item"><span class="store-info-icon">🗺️</span>${loc.section}</div>
+        <div class="store-info-item"><span class="store-info-icon">🛒</span>Aisle ${loc.aisle}</div>
+        <div class="store-info-item"><span class="store-info-icon">📚</span>${loc.shelf}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ── PRODUCT MODAL ─────────────────────────────────────────
+function openProdModal(p) {
+  document.getElementById('pm-img').src    = p.img_url || '';
+  document.getElementById('pm-cat').textContent  = p.category;
+  document.getElementById('pm-title').textContent = p.title;
+  document.getElementById('pm-price').textContent = `$${p.price.toFixed(2)}`;
+  document.getElementById('pm-stars').innerHTML = starsHtml(p.stars, p.reviews);
+  document.getElementById('pm-buy').href = p.buy_url || '#';
+  document.getElementById('prod-modal').classList.add('show');
+}
+function closeProdModal(e) {
+  if (e.target.id === 'prod-modal') document.getElementById('prod-modal').classList.remove('show');
+}
+
+// ── COMPARE ───────────────────────────────────────────────
+function toggleCompare(p) {
+  const idx = compareList.findIndex(c => c.asin === p.asin);
+  if (idx >= 0) {
+    compareList.splice(idx, 1);
+  } else if (compareList.length < 2) {
+    compareList.push(p);
+  } else {
+    compareList[1] = p;
+  }
+  renderCompareBar();
+  document.querySelectorAll('.prod-card').forEach(card => {
+    const asin = card.dataset.asin;
+    const inComp = compareList.find(c => c.asin === asin);
+    card.classList.toggle('in-compare', !!inComp);
+    const chk = card.querySelector('.compare-check');
+    if (chk) chk.textContent = inComp ? '✓' : '+';
+  });
+}
+
+function renderCompareBar() {
+  const bar   = document.getElementById('compare-bar');
+  const items = document.getElementById('compare-items');
+  bar.classList.toggle('visible', compareList.length > 0);
+  items.innerHTML = compareList.map(p => `
+    <div class="compare-chip">
+      <img src="${esc(p.img_url)}" alt="">
+      <span>${esc(p.title.slice(0,30))}…</span>
+      <button onclick="toggleCompare(${JSON.stringify(p).replace(/"/g,'&quot;')})">✕</button>
+    </div>
+  `).join('');
+}
+
+function clearCompare() { compareList = []; renderCompareBar(); }
+
+function runCompare() {
+  if (compareList.length < 2) {
+    sendQ('compare products'); return;
+  }
+  const q = `compare "${compareList[0].title.slice(0,30)}" vs "${compareList[1].title.slice(0,30)}"`;
+  clearCompare();
+  sendQ(q);
+}
+
+function triggerCompare() {
+  if (compareList.length >= 2) runCompare();
+  else alert('Select 2 products using the ⊕ button on each card, then click Compare.');
+}
+
+// ── VOICE INPUT ───────────────────────────────────────────
+function startVoice() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert('Voice input is not supported in this browser. Try Chrome or Edge.'); return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.onresult = e => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('voice-status').textContent = `Heard: "${transcript}"`;
+    document.getElementById('inp').value = transcript;
+    setTimeout(() => { stopVoice(); sendMsg(); }, 600);
+  };
+  recognition.onerror = () => stopVoice();
+  recognition.onend   = () => stopVoice();
+  recognition.start();
+  document.getElementById('voice-modal').classList.add('show');
+  document.getElementById('mic-btn').classList.add('listening');
+}
+
+function stopVoice() {
+  if (recognition) { recognition.stop(); recognition = null; }
+  document.getElementById('voice-modal').classList.remove('show');
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('voice-status').textContent = 'Say your query clearly';
+}
+
+// ── TTS ───────────────────────────────────────────────────
+let ttsOn = false;
+function toggleTTS() {
+  ttsOn = !ttsOn;
+  const btn = document.getElementById('tts-toggle');
+  btn.innerHTML = ttsOn ? '🔊 <span>Voice On</span>' : '🔇 <span>Voice Off</span>';
+  btn.classList.toggle('active', ttsOn);
+}
+function speak(text) {
+  if (!ttsOn || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.slice(0, 300));
+  u.rate = 1.05; u.pitch = 1;
+  window.speechSynthesis.speak(u);
+}
+
+// ── NLP PANEL ─────────────────────────────────────────────
+function updateNLP(nlp) {
+  if (!nlp) return;
+  const strip = document.getElementById('nlp-strip');
+  const sClass = {positive:'tag-pos', negative:'tag-neg', neutral:'tag-neu'}[nlp.sentiment?.label] || 'tag-neu';
+  let kws = nlp.keywords?.length ? nlp.keywords.slice(0,3).map(k=>`<span class="tag tag-purple">${esc(k)}</span>`).join('') : '';
+  let pr  = nlp.price_range ? `<span class="tag tag-gold">💰 ${JSON.stringify(nlp.price_range).replace(/[{}"]/g,'')}</span>` : '';
+  strip.innerHTML = `
+    <span class="tag tag-intent">🎯 ${nlp.intent.replace(/_/g,' ')}</span>
+    <span class="tag ${sClass}">${nlp.sentiment?.emoji} ${nlp.sentiment?.label}</span>
+    ${kws}${pr}
+    <span class="nlp-ms">${nlp.ms}ms</span>
+  `;
+}
+
+function updateStats(d) {
+  document.getElementById('s-msgs').textContent  = msgCount;
+  document.getElementById('s-prods').textContent = prodsSeen;
+  document.getElementById('s-cart').textContent  = d.cart?.length || 0;
+  if (d.nlp?.intent) document.getElementById('s-intent').textContent = d.nlp.intent.replace(/_/g,' ');
+}
+
+// ── CART ──────────────────────────────────────────────────
+function toggleCart() {
+  cartOpen = !cartOpen;
+  document.getElementById('cart-panel').classList.toggle('open', cartOpen);
+}
+function renderCart(cart) {
+  const items = document.getElementById('cart-items');
+  const foot  = document.getElementById('cart-foot');
+  if (!cart.length) {
+    items.innerHTML = '<p style="color:var(--textmut);font-size:12px;text-align:center;padding:18px">Your cart is empty</p>';
+    foot.style.display = 'none'; return;
+  }
+  const total = cart.reduce((s,i) => s + i.price*i.qty, 0);
+  items.innerHTML = cart.map(i => `
+    <div class="cart-item">
+      <img src="${esc(i.img || '')}" alt="" onerror="this.src=''">
+      <div class="cart-info">
+        <div class="cart-name">${esc(i.title)}</div>
+        <div class="cart-price">$${i.price.toFixed(2)} × ${i.qty}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cart-total-price').textContent = `$${total.toFixed(2)}`;
+  foot.style.display = 'block';
+}
+
+// ── MISC ──────────────────────────────────────────────────
+function showTyping() {
+  const wrap = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.id = 'typing'; d.className = 'msg-group bot';
+  d.innerHTML = `<div class="typing"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+  wrap.appendChild(d); scrollBot();
+}
+function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+function setBusy(b) { document.getElementById('send-btn').disabled = b; }
+function scrollBot() { const m = document.getElementById('msgs'); setTimeout(()=>m.scrollTop=m.scrollHeight, 60); }
+function timeNow() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function md(t) {
+  return String(t||'')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code style="background:var(--surf3);padding:1px 5px;border-radius:4px;font-size:11.5px">$1</code>')
+    .replace(/\n/g,'<br>');
+}
+function resize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function clearChat() {
+  document.getElementById('msgs').innerHTML='';
+  msgCount=0; prodsSeen=0;
+  document.getElementById('nlp-strip').innerHTML='<span style="color:var(--textmut);font-size:10px">NLP insights appear here after your first message</span>';
+}
+function askDetail(name) { sendQ(`tell me more about ${name}`); }
+
+window.addEventListener('load', () => document.getElementById('inp').focus());
+</script>
+</body>
+</html>
