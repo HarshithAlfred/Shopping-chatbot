@@ -29,7 +29,7 @@ EMB_PATH      = "embeddings.npy"
 IDX_PATH      = "faiss.index"
 DF_PATH       = "products.parquet"
 DB_PATH       = "shopbot.db"
-MODEL_NAME    = "all-MiniLM-L6-v2"
+MODEL_NAME    = "all-mpnet-base-v2" #"all-MiniLM-L6-v2"
 SAMPLE_SIZE   = 50000
 
 # ── Globals ───────────────────────────────────────────────
@@ -525,7 +525,7 @@ def build_response(intent: str, query: str, session: dict) -> dict:
         products = semantic_search(query, top_k=10, price_range=price_range)
         if products:
             pr_str = f" under ${price_range['max']:.0f}" if price_range and "max" in price_range else ""
-            text = f"🛍️ Found **{len(products)} products**{pr_str} matching your search. Each card shows the live image and a direct Amazon buy link!"
+            text = f"Bot:- Found **{len(products)} products**{pr_str} matching your search. Each card shows the live image and a direct Amazon buy link!"
         else:
             text = "🔍 I couldn't find exact matches. Try different keywords or browse a category!"
         response_type = "search"

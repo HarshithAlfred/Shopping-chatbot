@@ -133,7 +133,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .btn-compare-go:hover{background:#7c3aed}
 
 /* ── LOCATION MAP ──────────────────────────────────────── */
-.store-map-wrap{background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px;width:100%}
+/* .store-map-wrap{background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px;width:100%}
 .store-map-title{font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
 .store-map-canvas{position:relative;height:160px;background:var(--surf3);border-radius:8px;overflow:hidden}
 .store-map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(var(--border2) 1px,transparent 1px),linear-gradient(90deg,var(--border2) 1px,transparent 1px);background-size:20px 20px}
@@ -143,7 +143,403 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .pin-label{font-size:9px;font-weight:700;color:var(--gold);background:var(--bg);padding:1px 5px;border-radius:4px;white-space:nowrap}
 .store-map-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
 .store-info-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--textdim)}
-.store-info-icon{font-size:13px}
+.store-info-icon{font-size:13px} */
+/* ─────────────────────────────────────────────
+   STORE MAP SYSTEM
+───────────────────────────────────────────── */
+
+.store-map-wrap{
+  width:100%;
+  margin-top:18px;
+  border-radius:22px;
+  overflow:hidden;
+  background:#0f172a;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 12px 50px rgba(0,0,0,.45);
+}
+
+.store-map-header{
+  padding:18px 22px;
+  background:linear-gradient(to right,#111827,#0b1220);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.store-map-title{
+  font-size:15px;
+  font-weight:700;
+  color:#fbbf24;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.store-map-sub{
+  margin-top:6px;
+  font-size:13px;
+  color:#94a3b8;
+}
+
+/* ─────────────────────────────────────────────
+   MAP BODY
+───────────────────────────────────────────── */
+
+.smart-store-map{
+  position:relative;
+  min-height:620px;
+  padding:20px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at top left, rgba(59,130,246,.08), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(251,191,36,.08), transparent 30%),
+    #111827;
+}
+
+/* grid background */
+
+.smart-store-map::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+}
+
+/* ─────────────────────────────────────────────
+   WINGS
+───────────────────────────────────────────── */
+
+.map-wing{
+  position:absolute;
+  font-size:11px;
+  color:#64748b;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-weight:700;
+  z-index:2;
+}
+
+.map-wing.top{
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.map-wing.bottom{
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.map-wing.left{
+  left:8px;
+  top:50%;
+  transform:translateY(-50%) rotate(-90deg);
+}
+
+.map-wing.right{
+  right:8px;
+  top:50%;
+  transform:translateY(-50%) rotate(90deg);
+}
+
+/* ─────────────────────────────────────────────
+   MAIN CORRIDORS
+───────────────────────────────────────────── */
+
+.main-corridor-h{
+  position:absolute;
+  left:6%;
+  width:88%;
+  height:54px;
+  background:linear-gradient(to right,#334155,#475569);
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.06em;
+  box-shadow:inset 0 0 10px rgba(255,255,255,.05);
+}
+
+.main-corridor-h.top{
+  top:170px;
+}
+
+.main-corridor-h.bottom{
+  bottom:170px;
+}
+
+.main-corridor-v{
+  position:absolute;
+  top:9%;
+  bottom:9%;
+  width:56px;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(to bottom,#334155,#475569);
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  writing-mode:vertical-rl;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.05em;
+}
+
+/* ─────────────────────────────────────────────
+   AISLES
+───────────────────────────────────────────── */
+
+.store-grid{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+
+.aisle{
+  position:absolute;
+  width:96px;
+  height:120px;
+  border-radius:16px;
+  background:#1e293b;
+  border:1px solid rgba(255,255,255,.06);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  transition:.25s ease;
+  z-index:5;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.02),
+    0 8px 20px rgba(0,0,0,.35);
+}
+
+.aisle:hover{
+  transform:translateY(-4px);
+}
+
+.aisle-code{
+  font-size:22px;
+  font-weight:800;
+  color:white;
+}
+
+.aisle-type{
+  font-size:11px;
+  color:#94a3b8;
+  text-transform:uppercase;
+  text-align:center;
+  line-height:1.4;
+  padding:0 8px;
+}
+
+/* category colors */
+
+.aisle.electronics{
+  border-color:rgba(59,130,246,.25);
+}
+
+.aisle.home{
+  border-color:rgba(34,197,94,.25);
+}
+
+.aisle.books{
+  border-color:rgba(168,85,247,.25);
+}
+
+.aisle.beauty{
+  border-color:rgba(236,72,153,.25);
+}
+
+/* ─────────────────────────────────────────────
+   ACTIVE
+───────────────────────────────────────────── */
+
+.aisle.active{
+  background:linear-gradient(145deg,#facc15,#f59e0b);
+  border:none;
+  transform:scale(1.08);
+  z-index:50;
+  animation:pulse 2s infinite;
+}
+
+.aisle.active .aisle-code,
+.aisle.active .aisle-type{
+  color:#111827;
+}
+
+@keyframes pulse{
+  0%{
+    box-shadow:0 0 0 0 rgba(250,204,21,.45);
+  }
+  70%{
+    box-shadow:0 0 0 18px rgba(250,204,21,0);
+  }
+  100%{
+    box-shadow:0 0 0 0 rgba(250,204,21,0);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   PIN
+───────────────────────────────────────────── */
+
+.store-pin{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#ef4444;
+  box-shadow:
+    0 0 0 6px rgba(239,68,68,.18),
+    0 0 18px rgba(239,68,68,.9);
+  animation:pinPulse 1.4s infinite;
+}
+
+@keyframes pinPulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.25);}
+  100%{transform:scale(1);}
+}
+
+/* ─────────────────────────────────────────────
+   PATH LINE
+───────────────────────────────────────────── */
+
+.path-line{
+  position:absolute;
+  height:5px;
+  border-radius:999px;
+  background:
+    repeating-linear-gradient(
+      to right,
+      #facc15 0 14px,
+      transparent 14px 24px
+    );
+  z-index:3;
+  opacity:.95;
+}
+
+/* ─────────────────────────────────────────────
+   ENTRANCE
+───────────────────────────────────────────── */
+
+.store-entrance{
+  position:absolute;
+  bottom:26px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  background:#0f172a;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:10px 18px;
+  color:#cbd5e1;
+  font-size:12px;
+  font-weight:700;
+}
+
+/* ─────────────────────────────────────────────
+   LEGEND
+───────────────────────────────────────────── */
+
+.store-legend{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  padding:16px 22px;
+  background:#0b1220;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#cbd5e1;
+}
+
+.legend-box{
+  width:14px;
+  height:14px;
+  border-radius:4px;
+}
+
+.legend-yellow{
+  background:#facc15;
+}
+
+.legend-blue{
+  background:#3b82f6;
+}
+
+.legend-gray{
+  background:#475569;
+}
+
+/* ─────────────────────────────────────────────
+   INFO
+───────────────────────────────────────────── */
+
+.store-map-info{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:14px;
+  padding:20px;
+  background:#0f172a;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+
+.store-info-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#111827;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:14px;
+  padding:14px;
+  color:#cbd5e1;
+  font-size:13px;
+}
+
+.store-info-icon{
+  font-size:18px;
+}
+
+/* ─────────────────────────────────────────────
+   MOBILE
+───────────────────────────────────────────── */
+
+@media(max-width:900px){
+
+  .smart-store-map{
+    min-height:900px;
+  }
+
+  .aisle{
+    width:74px;
+    height:92px;
+  }
+
+  .aisle-code{
+    font-size:16px;
+  }
+
+  .main-corridor-h{
+    height:42px;
+  }
+
+  .main-corridor-v{
+    width:42px;
+  }
+}
 
 /* ── TYPING ─────────────────────────────────────────────── */
 .typing{display:flex;align-items:center;gap:4px;padding:11px 15px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);border-bottom-left-radius:3px;width:fit-content}
@@ -349,7 +745,7 @@ textarea::placeholder{color:var(--textmut)}
   <div class="cart-items" id="cart-items"><p style="color:var(--textmut);font-size:12px;text-align:center;padding:18px">Your cart is empty</p></div>
   <div class="cart-foot" id="cart-foot" style="display:none">
     <div class="cart-total"><span>Total</span><span id="cart-total-price">$0.00</span></div>
-    <button class="btn-checkout">Checkout →</button>
+    <button class="btn-checkout" id="btn-checkout" onclick="checkout()">Checkout →</button>
   </div>
 </div>
 
@@ -385,7 +781,8 @@ textarea::placeholder{color:var(--textmut)}
       <div class="prod-modal-price" id="pm-price"></div>
       <div class="prod-modal-stars" id="pm-stars"></div>
       <div class="prod-modal-actions">
-        <a id="pm-buy" href="#" target="_blank" class="btn-modal-buy">🛒 Buy on Amazon</a>
+        <button id="btn-addtocart" class="btn-modal-close" > 🛒 add to cart </button>
+        <a id="pm-buy" href="#" target="_blank" class="btn-modal-buy"> Buy on Amazon</a>
         <button class="btn-modal-close" onclick="document.getElementById('prod-modal').classList.remove('show')">✕ Close</button>
       </div>
     </div>
@@ -400,6 +797,9 @@ let msgCount = 0, prodsSeen = 0, cartOpen = false;
 let compareList = [];        // up to 2 products for comparison
 let ttsEnabled = false;
 let recognition = null;
+
+let cart = [];
+let currentProduct = null;
 
 // ── SEND ──────────────────────────────────────────────────
 async function sendMsg() {
@@ -479,6 +879,7 @@ function addBotMsg(d) {
 
 // ── PRODUCT CARD ──────────────────────────────────────────
 function prodCard(p) {
+  
   const img    = p.img_url ? `<img class="prod-img" src="${esc(p.img_url)}" alt="${esc(p.title)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div class="prod-img-placeholder" style="display:none">🛍️</div>` : `<div class="prod-img-placeholder">🛍️</div>`;
   const best   = p.is_best_seller ? `<span class="best-badge">🏆 Best Seller</span>` : '';
   const disc   = p.discount > 0 ? `<span class="discount-badge">-${p.discount}%</span>` : '';
@@ -487,7 +888,7 @@ function prodCard(p) {
   const buyUrl = p.buy_url || '#';
   const inComp = compareList.find(c=>c.asin===p.asin) ? 'in-compare' : '';
   const chk    = inComp ? '✓' : '+';
-
+  
   return `
     <div class="prod-card ${inComp}" data-asin="${p.asin}" onclick="openProdModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">
       <div class="prod-img-wrap">
@@ -519,31 +920,170 @@ function starsHtml(stars, reviews) {
 }
 
 // ── STORE MAP ─────────────────────────────────────────────
-function storeMap(loc) {
-  const x = Math.max(10, Math.min(90, loc.map_x));
-  const y = Math.max(10, Math.min(90, loc.map_y));
-  return `
-    <div class="store-map-wrap">
-      <div class="store-map-title">📍 In-Store Location</div>
-      <div class="store-map-canvas">
-        <div class="store-map-grid"></div>
-        <div class="store-pin" style="left:${x}%;top:${y}%">
-          <div class="pin-dot"></div>
-          <div class="pin-label">${loc.aisle}</div>
+function storeMap(loc){
+
+  const aisleCode = (loc.aisle || "A1").toUpperCase();
+
+  /* Generate complete store grid dynamically */
+
+  const rows = ['A','B','C','D','E','F'];
+  const cols = [1,2,3,4,5];
+
+  const categoryColors = {
+    electronics: 'electronics',
+    beauty: 'beauty',
+    books: 'books',
+    home: 'home'
+  };
+
+  let aislesHTML = '';
+
+  rows.forEach((row,rowIndex)=>{
+
+    cols.forEach((col,colIndex)=>{
+
+      const code = `${row}${col}`;
+
+      const active = code === aisleCode;
+
+      const x = 6 + (colIndex * 17);
+      const y = 8 + (rowIndex * 15);
+
+      aislesHTML += `
+        <div
+          class="aisle ${active ? 'active' : ''}"
+          style="
+            left:${x}%;
+            top:${y}%;
+          "
+        >
+
+          ${active ? '<div class="store-pin"></div>' : ''}
+
+          <div class="aisle-code">
+            ${code}
+          </div>
+
+          <div class="aisle-type">
+            ${active ? (loc.category || 'Products') : 'Section'}
+          </div>
+
         </div>
+      `;
+    });
+
+  });
+
+  return `
+
+  <div class="store-map-wrap">
+
+    <div class="store-map-header">
+
+      <div class="store-map-title">
+        🗺️ Smart Store Navigation
       </div>
-      <div class="store-map-info">
-        <div class="store-info-item"><span class="store-info-icon">🏢</span>${loc.floor}</div>
-        <div class="store-info-item"><span class="store-info-icon">🗺️</span>${loc.section}</div>
-        <div class="store-info-item"><span class="store-info-icon">🛒</span>Aisle ${loc.aisle}</div>
-        <div class="store-info-item"><span class="store-info-icon">📚</span>${loc.shelf}</div>
+
+      <div class="store-map-sub">
+        📍 Navigate to
+        <strong>${loc.category || 'Product'}</strong>
+        in aisle
+        <strong>${loc.aisle || 'A1'}</strong>
       </div>
+
     </div>
+
+    <div class="smart-store-map">
+
+      <div class="map-wing top">
+        ${loc.section || 'North Wing'}
+      </div>
+
+      <div class="map-wing bottom">
+        South Wing
+      </div>
+
+      <div class="map-wing left">
+        West Hall
+      </div>
+
+      <div class="map-wing right">
+        East Hall
+      </div>
+
+      <div class="main-corridor-h top">
+        Main Corridor
+      </div>
+
+      <div class="main-corridor-h bottom">
+        Main Corridor
+      </div>
+
+      <div class="main-corridor-v">
+        Central Walkway
+      </div>
+
+      <div class="store-grid">
+
+        ${aislesHTML}
+
+      </div>
+
+      <div class="store-entrance">
+        🚪 Main Entrance
+      </div>
+
+    </div>
+
+    <div class="store-legend">
+
+      <div class="legend-item">
+        <div class="legend-box legend-yellow"></div>
+        Your Destination
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-box legend-blue"></div>
+        Store Sections
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-box legend-gray"></div>
+        Corridors
+      </div>
+
+    </div>
+
+    <div class="store-map-info">
+
+      <div class="store-info-item">
+        <span class="store-info-icon">🏢</span>
+        ${loc.floor || 'First Floor'}
+      </div>
+
+      <div class="store-info-item">
+        <span class="store-info-icon">🗺️</span>
+        ${loc.section || 'Central Area'}
+      </div>
+
+      <div class="store-info-item">
+        <span class="store-info-icon">🛒</span>
+        Aisle ${loc.aisle || 'A1'}
+      </div>
+
+      <div class="store-info-item">
+        <span class="store-info-icon">📚</span>
+        ${loc.shelf || 'Shelf 1'}
+      </div>
+
+    </div>
+
+  </div>
   `;
 }
-
 // ── PRODUCT MODAL ─────────────────────────────────────────
 function openProdModal(p) {
+  document.getElementById('btn-addtocart').onclick = () => addToCart(p);
   document.getElementById('pm-img').src    = p.img_url || '';
   document.getElementById('pm-cat').textContent  = p.category;
   document.getElementById('pm-title').textContent = p.title;
@@ -616,12 +1156,17 @@ function startVoice() {
   recognition.interimResults = false;
   recognition.onresult = e => {
     const transcript = e.results[0][0].transcript;
+    console.log(transcript)
     document.getElementById('voice-status').textContent = `Heard: "${transcript}"`;
     document.getElementById('inp').value = transcript;
     setTimeout(() => { stopVoice(); sendMsg(); }, 600);
   };
   recognition.onerror = () => stopVoice();
-  recognition.onend   = () => stopVoice();
+  recognition.onend = () => {
+  recognition = null;
+  document.getElementById('voice-modal').classList.remove('show');
+  document.getElementById('mic-btn').classList.remove('listening');
+};
   recognition.start();
   document.getElementById('voice-modal').classList.add('show');
   document.getElementById('mic-btn').classList.add('listening');
@@ -691,12 +1236,101 @@ function renderCart(cart) {
       <div class="cart-info">
         <div class="cart-name">${esc(i.title)}</div>
         <div class="cart-price">$${i.price.toFixed(2)} × ${i.qty}</div>
+        <button 
+      onclick="removeFromCart('${i.asin}')"
+      style="
+        background:none;
+        border:none;
+        color:red;
+        cursor:pointer;
+        font-size:16px;
+      ">
+      ✕
+    </button>
       </div>
     </div>
   `).join('');
   document.getElementById('cart-total-price').textContent = `$${total.toFixed(2)}`;
   foot.style.display = 'block';
 }
+
+function addToCart(product) {
+
+  if (!product) return;
+
+  const existingItem = cart.find(item => item.asin === product.asin);
+
+  if (existingItem) {
+
+    // already in cart → increase qty
+    existingItem.qty += 1;
+
+  } else {
+
+    // new product → add to cart
+    cart.push({
+      asin: product.asin,
+      title: product.title,
+      price: product.price,
+      img: product.img_url,
+      qty: 1
+    });
+
+  }
+
+  renderCart(cart);
+
+  document.getElementById('s-cart').textContent = cart.length;
+
+  if (!cartOpen) {
+    toggleCart();
+  }
+
+//document.getElementById('btn-addtocart').innerText = 'Added to cart';
+}
+
+function removeFromCart(asin) {
+
+  cart = cart.filter(item => item.asin !== asin);
+
+  renderCart(cart);
+
+  document.getElementById('s-cart').textContent = cart.length;
+}
+// checkout --------------------
+
+function checkout() {
+
+  if (cart.length === 0) {
+    alert('Your cart is empty');
+    return;
+  }
+
+  const total = cart.reduce((sum, item) => {
+    return sum + (item.price * item.qty);
+  }, 0);
+
+const btn = document.getElementById('btn-checkout');
+
+btn.innerText = `✅ Ordered ($${total.toFixed(2)})`;
+
+btn.disabled = true;
+
+  setTimeout(() => {
+
+    cart = [];
+
+    renderCart(cart);
+
+    document.getElementById('s-cart').textContent = 0;
+
+    btn.innerText = 'Checkout →';
+
+    btn.disabled = false;
+
+  }, 8500);
+}
+
 
 // ── MISC ──────────────────────────────────────────────────
 function showTyping() {
