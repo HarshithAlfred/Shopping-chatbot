@@ -1,7 +1,8 @@
-numpy==2.4.2
-pandas==3.0.0
-faiss-cpu==1.13.2
-Flask==3.1.3
-flask-cors==6.0.2
-sentence-transformers==5.4.1
-textblob==0.20.0
+Flask
+flask-cors
+gunicorn
+numpy
+pandas
+faiss-cpu
+sentence-transformers
+textblob

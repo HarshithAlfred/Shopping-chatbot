@@ -45,7 +45,95 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
 .stat-label{font-size:11px;color:var(--textmut)}
 .stat-val{font-size:12px;font-weight:600;color:var(--gold)}
+/* CATEGORY API LIST */
+.api-category-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
 
+
+/* CARD */
+.api-category-card{
+  width:100%;
+  border:none;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+  transition:all .25s ease;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+
+
+/* LEFT SIDE */
+.api-category-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+
+/* ICON */
+.api-category-icon{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:#f3f4f6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+
+
+/* CATEGORY TITLE */
+.api-category-title{
+  font-size:14px;
+  font-weight:600;
+  color:#111827;
+  text-align:left;
+  line-height:1.3;
+}
+
+
+/* COUNT BADGE */
+.api-category-count{
+  background:#111827;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  min-width:65px;
+  text-align:center;
+}
+
+
+/* HOVER */
+.api-category-card:hover{
+  transform:translateY(-2px);
+  border-color:#d1d5db;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
+
+
+/* CLICK */
+.api-category-card:active{
+  transform:scale(.98);
+}
+
+
+/* ACTIVE CARD */
+.api-category-card.active{
+  border:2px solid #111827;
+  background:#f9fafb;
+}
 /* ── MAIN CHAT ─────────────────────────────────────────── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
@@ -132,18 +220,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .btn-compare-go{padding:8px 18px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
 .btn-compare-go:hover{background:#7c3aed}
 
-/* ── LOCATION MAP ──────────────────────────────────────── */
-/* .store-map-wrap{background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px;width:100%}
-.store-map-title{font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.store-map-canvas{position:relative;height:160px;background:var(--surf3);border-radius:8px;overflow:hidden}
-.store-map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(var(--border2) 1px,transparent 1px),linear-gradient(90deg,var(--border2) 1px,transparent 1px);background-size:20px 20px}
-.store-pin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px}
-.pin-dot{width:16px;height:16px;background:var(--gold);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 12px var(--goldglow);animation:pinPulse 2s infinite}
-@keyframes pinPulse{0%,100%{box-shadow:0 0 8px var(--goldglow)}50%{box-shadow:0 0 20px var(--goldglow)}}
-.pin-label{font-size:9px;font-weight:700;color:var(--gold);background:var(--bg);padding:1px 5px;border-radius:4px;white-space:nowrap}
-.store-map-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
-.store-info-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--textdim)}
-.store-info-icon{font-size:13px} */
+
 /* ─────────────────────────────────────────────
    STORE MAP SYSTEM
 ───────────────────────────────────────────── */
@@ -647,7 +724,9 @@ textarea::placeholder{color:var(--textmut)}
       <button class="cat-btn" onclick="sendQ('show me books')">📚 Books</button>
       <button class="cat-btn" onclick="sendQ('show me kitchen appliances')">🍳 Kitchen</button>
       <button class="cat-btn" onclick="sendQ('show me chargers and cables')">🔌 Cables</button>
+      
     </div>
+    <div class="api-category-list" id="category-list"></div>
   </div>
   <div class="sb-sect" style="margin-top:14px">
     <div class="sb-label">Session Stats</div>
@@ -1330,7 +1409,63 @@ btn.disabled = true;
 
   }, 8500);
 }
+//categories
+async function loadCategories() {
 
+  try {
+
+    const res = await fetch(`${API}/api/category`);
+
+    const categories = await res.json();
+
+    console.log(categories);
+
+    renderCategories(categories);
+
+  } catch (err) {
+
+    console.error("API Error:", err);
+
+  }
+}
+
+
+// DISPLAY CATEGORIES
+function renderCategories(categories) {
+
+  const container = document.getElementById("category-list");
+
+  container.innerHTML = "";
+
+  categories.forEach(cat => {
+
+    const div = document.createElement("button");
+
+    div.className = "api-category-card";
+
+div.innerHTML = `
+  <div class="api-category-left">
+
+    <div class="api-category-icon">
+      📦
+    </div>
+
+    <div class="api-category-title">
+      ${cat.name}
+    </div>
+
+  </div>
+
+  <div class="api-category-count">
+    ${cat.count}
+  </div>
+`;
+    container.appendChild(div);
+
+  });
+
+}
+loadCategories()
 
 // ── MISC ──────────────────────────────────────────────────
 function showTyping() {
