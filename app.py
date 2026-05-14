@@ -29,7 +29,7 @@ EMB_PATH      = "embeddings.npy"
 IDX_PATH      = "faiss.index"
 DF_PATH       = "products.parquet"
 DB_PATH       = "shopbot.db"
-MODEL_NAME    = "all-mpnet-base-v2" #"all-MiniLM-L6-v2"
+MODEL_NAME    ="all-MiniLM-L6-v2"  #"all-mpnet-base-v2" 
 SAMPLE_SIZE   = 50000
 
 # ── Globals ───────────────────────────────────────────────
