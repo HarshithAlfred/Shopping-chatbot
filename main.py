@@ -624,20 +624,30 @@ def api_session(sid):
     return jsonify({"cart": s.get("cart",[]), "turn": s.get("turn",0),
                     "last_intent": s.get("last_intent")})
 
-@app.route("/api/stats", methods=["GET"])
-def api_stats():
-    conn = sqlite3.connect(DB_PATH)
-    c    = conn.cursor()
-    c.execute("SELECT intent, COUNT(*) as n FROM conversations GROUP BY intent ORDER BY n DESC")
-    intents = [{"intent":r[0],"count":r[1]} for r in c.fetchall()]
-    c.execute("SELECT sentiment, COUNT(*) as n FROM conversations GROUP BY sentiment")
-    sentiments = [{"label":r[0],"count":r[1]} for r in c.fetchall()]
-    conn.close()
-    return jsonify({"intents": intents, "sentiments": sentiments,
-                    "total_products": len(df), "sessions": len(sessions)})
+# @app.route("/api/stats", methods=["GET"])
+# def api_stats():
+#     conn = sqlite3.connect(DB_PATH)
+#     c    = conn.cursor()
+#     c.execute("SELECT intent, COUNT(*) as n FROM conversations GROUP BY intent ORDER BY n DESC")
+#     intents = [{"intent":r[0],"count":r[1]} for r in c.fetchall()]
+#     c.execute("SELECT sentiment, COUNT(*) as n FROM conversations GROUP BY sentiment")
+#     sentiments = [{"label":r[0],"count":r[1]} for r in c.fetchall()]
+#     conn.close()
+#     return jsonify({"intents": intents, "sentiments": sentiments,
+#                     "total_products": len(df), "sessions": len(sessions)})
+#for gunicorn
+load_system()
 
 # ══════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    load_system()
-    print("🌐 Server: http://localhost:5000")
-    app.run(debug=False, port=5000, host="0.0.0.0")
+    print("🌐 Server running")
+    app.run(
+        debug=False,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8080))
+    )
+# # ══════════════════════════════════════════════════════════
+# if __name__ == "__main__":
+#     load_system()
+#     print("🌐 Server: http://localhost:5000")
+#     app.run(debug=False, port=5000, host="0.0.0.0")
