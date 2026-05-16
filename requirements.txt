@@ -6,3 +6,4 @@ pandas
 faiss-cpu
 sentence-transformers
 textblob
+pyarrow
