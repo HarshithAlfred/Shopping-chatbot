@@ -1,6 +1,7 @@
-
-
+models/
 embeddings.npy
 faiss.index
 amazon_products.csv
 amazon_categories.csv
+shopbot.db
+products.parquet
