@@ -1,4 +1,6 @@
-amazon_products.csv
-amazon_categories.csv
+
+
 embeddings.npy
 faiss.index
+amazon_products.csv
+amazon_categories.csv
