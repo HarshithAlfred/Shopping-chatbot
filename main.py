@@ -22,7 +22,7 @@ app = Flask(__name__, static_folder=".", template_folder=".")
 CORS(app)
 
 # ── Paths ─────────────────────────────────────────────────
-DATA_DIR    = "."
+DATA_DIR    = "Model-dep"
 PRODUCTS_CSV  = os.path.join(DATA_DIR, "amazon_products.csv")
 CATEGORIES_CSV= os.path.join(DATA_DIR, "amazon_categories.csv")
 EMB_PATH      = "embeddings.npy"
