@@ -1,3 +1,21 @@
+---
+title: Shopping Chatbot
+emoji: 🛒
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
+# Shopping Chatbot
+
+Semantic shopping recommendation chatbot using:
+- FAISS
+- SentenceTransformers
+- FastAPI/Flask
+- Product embeddings
+
+------
 # Shopping-chatbot
 | Component           | Technique           |
 | ------------------- | ------------------- |

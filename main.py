@@ -25,10 +25,10 @@ CORS(app)
 DATA_DIR    = "Model-dep"
 PRODUCTS_CSV  = os.path.join(DATA_DIR, "amazon_products.csv")
 CATEGORIES_CSV= os.path.join(DATA_DIR, "amazon_categories.csv")
-EMB_PATH      = "embeddings.npy"
-IDX_PATH      = "faiss.index"
-DF_PATH       = "products.parquet"
-DB_PATH       = "shopbot.db"
+EMB_PATH = os.path.join(DATA_DIR, "embeddings.npy")
+IDX_PATH = os.path.join(DATA_DIR, "faiss.index")
+DF_PATH  = os.path.join(DATA_DIR, "products.parquet")
+DB_PATH  = os.path.join(DATA_DIR, "shopbot.db")
 MODEL_NAME    ="all-MiniLM-L6-v2"  #"all-mpnet-base-v2" 
 SAMPLE_SIZE   = 50000
 
